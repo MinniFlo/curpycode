@@ -23,8 +23,8 @@ class GameWin:
         self.hint_start = self.color_index_map[3] + 6
         self.cur_key = 0
         self.color_chr = chr(9608) * 2
-        self.white_chr = chr(9632)
-        self.black_chr = chr(9633)
+        self.white_chr = chr(9633)
+        self.black_chr = chr(9632)
         self.char_map = {0: chr(9556), 1: chr(9553), 2: chr(9562), 3: chr(9559), 4: chr(9553), 5: chr(9565)}
         self.horizontal_line = "{}{}".format(chr(9500).ljust(self.x - 1, chr(9472)), chr(9508))
         self.horizontal_line_2 = "{}{}".format(chr(0x255e).ljust(self.x - 1, chr(0x2550)), chr(0x2561))
