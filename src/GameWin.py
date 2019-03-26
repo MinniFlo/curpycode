@@ -137,13 +137,10 @@ class GameWin:
     def input(self):
         self.cur_key = self.main_win.getch()
         for tup in self.input_map:
-            for i in tup:
-                if i == self.cur_key:
-                    self.input_map[tup]()
-                    break
-            else:
-                continue
-            break
+            if self.cur_key in tup:
+                self.input_map[tup]()
+                break
+
 
     def up_input(self):
         if not self.win and not self.loose:
