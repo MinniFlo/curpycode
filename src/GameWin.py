@@ -7,43 +7,74 @@ import time
 class GameWin:
 
     def __init__(self, scr):
+        # the screen obj
         self.scr = scr
+        # the magic size of the window
         self.y, self.x = 31, 38
+        # creates the game window
         self.main_win = curses.newwin(self.y, self.x, 0, 0)
+        # instance of the Logic class
         self.logic = SuperCodeLogic()
+        # instance of the Color class
         self.color = Color()
+        # all available inputs as key's and the values are the functions they trigger
         self.input_map = {(ord('w'), ord('k'), 259): self.up_input, (ord('s'), ord('j'), 258): self.down_input,
                           (ord('d'), ord('l'), 261): self.right_input, (ord('a'), ord('h'), 260): self.left_input,
                           (49, 50, 51, 52, 53, 54): self.num_input,
                           (ord(' '), 10): self.enter_input, (ord('q'), 27): self.exit_input}
+        # is the index to the try_index_map witch defines where on the x-axis the try's are located
         self.try_index = 0
         self.try_index_map = {0: 2, 1: 6, 2: 10, 3: 14, 4: 18, 5: 22, 6: 26}
+        # is the index to the color_index_map witch defines where on the y-axis the single guess is located
         self.color_index = 0
         self.color_index_map = {0: 4, 1: 9, 2: 14, 3: 19}
+        # defines where on the y-axis the hints are located
         self.hint_start = self.color_index_map[3] + 6
+        # stores current input
         self.cur_key = 0
+        # the symbol that presents the color
         self.color_chr = chr(9608) * 2
+        # the char that presents an almost hit
         self.white_chr = chr(9633)
+        # the char that presents a perfect hit
         self.black_chr = chr(9632)
-        self.char_map = {0: chr(9556), 1: chr(9553), 2: chr(9562), 3: chr(9559), 4: chr(9553), 5: chr(9565)}
+        # the char that presents a none hit
+        self.blank_chr = chr(8728)
+        # contains all char's needed to build cursor
+        # (0 to 5 are in specific order needed for redraw_cursor_pos 6 is there for storage reasons)
+        self.cursor_chars = {0: chr(9556), 1: chr(9553), 2: chr(9562), 3: chr(9559), 4: chr(9553), 5: chr(9565),
+                             6: chr(9552)}
+        # some string's that are used to build interface
         self.horizontal_line = "{}{}".format(chr(9500).ljust(self.x - 1, chr(9472)), chr(9508))
         self.horizontal_line_2 = "{}{}".format(chr(0x255e).ljust(self.x - 1, chr(0x2550)), chr(0x2561))
+        # flag that runs the main loop
         self.run = True
+        # flag that indicates a win
         self.win = False
+        # flag that indicates a loose
         self.loose = False
+        # flag that indicates weather the next step is allowed
         self.next_try = False
-        self.solution_draw = False
-        self.old_index = (0, 0)
+        # flag that indicates that the solution has to be drawn
+        self.draw_solution = False
+        # is the position where the cursor is located
+        self.old_cursor_pos = (0, 0)
 
     def setup(self):
+        # set's curses to no echo mode
         curses.noecho()
+        # set's cursor visibility to none visible
         curses.curs_set(0)
+        # activates delayed input
         self.main_win.nodelay(False)
+        # activates arrow key's
         self.main_win.keypad(True)
+        # draws the interface
         self.draw()
         self.render()
         self.logic.create_color_code()
 
+    # draws the interface (lines)
     def draw(self):
         start_y = 4
         self.main_win.box()
@@ -52,34 +83,25 @@ class GameWin:
             start_y += 4
         self.main_win.addstr(start_y, 0, self.horizontal_line_2)
 
+    # draws colors / hints / end game things
     def render(self):
-        if self.win:
-            self.draw_hints()
+        self.draw_hints()
+        
         if self.next_try:
-            self.draw_hints()
-            self.prep_next_round()
+            self.tests_loose()
 
-        if not self.win and not self.loose:
-            self.draw_next_try()
+        if self.win or self.loose:
+            if self.draw_solution:
+                self.draw_game_ending()
+                self.draw_solution = False
         else:
-            if self.solution_draw:
-                if self.win:
-                    self.main_win.addstr(0, 16, " win ")
-                elif self.loose:
-                    self.main_win.addstr(0, 16, " sad ")
-                self.main_win.addstr(self.try_index_map[6], 12, "The Solution:")
-                for i in range(4):
-                    self.main_win.addstr(self.try_index_map[6] + 2, self.color_index_map[i] + 6, self.color_chr,
-                                         curses.color_pair(self.logic.color_code[i]))
-                    self.main_win.refresh()
-                    time.sleep(0.25)
-                self.solution_draw = False
+            self.redraw_colors()
 
         if self.next_try:
             self.next_round()
-            self.draw_next_try()
+            self.redraw_colors()
 
-        self.new_move()
+        self.redraw_cursor()
 
     def draw_hints(self):
         cur_hint_index = self.hint_start
@@ -89,32 +111,52 @@ class GameWin:
             elif val == 1:
                 self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.white_chr + ' ')
             else:
-                self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, chr(8728))
+                self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.blank_chr)
             cur_hint_index += 3
             if i == 3:
+                # prints a wall piece at the end to prevent a bug in curses where the unicode char's are cut off if no
+                # symbol follows
                 self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, chr(9474))
 
-    def draw_next_try(self):
+    # updates colors and draws the color chars on next try
+    def redraw_colors(self):
         for i in range(4):
             self.main_win.addstr(self.try_index_map[self.try_index], self.color_index_map[i], self.color_chr,
                                  curses.color_pair(self.logic.current_guess[i].get_color()))
 
-    def prep_next_round(self):
+    # draws everything after the game finished
+    def draw_game_ending(self):
+        if self.win:
+            self.main_win.addstr(0, 16, " win ")
+        elif self.loose:
+            self.main_win.addstr(0, 16, " sad ")
+        self.main_win.addstr(self.try_index_map[6], 12, "The Solution:")
+        for i in range(4):
+            self.main_win.addstr(self.try_index_map[6] + 2, self.color_index_map[i] + 6, self.color_chr,
+                                 curses.color_pair(self.logic.color_code[i]))
+            self.main_win.refresh()
+            time.sleep(0.25)
+
+    # checks after every valid enter input if YOU LOST THE GAME
+    def tests_loose(self):
         self.try_index += 1
         if self.try_index >= 6:
             self.loose = True
-            self.solution_draw = True
+            self.draw_solution = True
             self.next_try = False
 
+    # resets some things to init next round
     def next_round(self):
         self.next_try = False
         self.color_index = 0
         self.logic.reset_current_guess()
 
-    def new_move(self):
-        if not self.win and not self.loose:
-            old_y = self.try_index_map[self.old_index[1]] - 1
-            old_x = self.color_index_map[self.old_index[0]] - 2
+    # removes and redraws the cursor
+    def redraw_cursor(self):
+        if not (self.win or self.loose):
+            old_y = self.try_index_map[self.old_cursor_pos[1]] - 1
+            old_x = self.color_index_map[self.old_cursor_pos[0]] - 2
+            # removes old cursor
             for i in range(3):
                 if i == 1:
                     self.main_win.addstr(old_y, old_x, ' ')
@@ -126,14 +168,16 @@ class GameWin:
                 old_y += 1
             cur_y = self.try_index_map[self.try_index] - 1
             cur_x = self.color_index_map[self.color_index] - 2
+            # prints new cursor
             for i in range(3):
                 if i != 1:
-                    self.main_win.addstr(cur_y, cur_x, chr(9552) * 5)
-                self.main_win.addstr(cur_y, cur_x, self.char_map[i])
-                self.main_win.addstr(cur_y, cur_x + 5, self.char_map[i + 3])
+                    self.main_win.addstr(cur_y, cur_x, self.cursor_chars[6] * 5)
+                self.main_win.addstr(cur_y, cur_x, self.cursor_chars[i])
+                self.main_win.addstr(cur_y, cur_x + 5, self.cursor_chars[i + 3])
                 cur_y += 1
-            self.old_index = (self.color_index, self.try_index)
+            self.old_cursor_pos = (self.color_index, self.try_index)
 
+    # handels input
     def input(self):
         self.cur_key = self.main_win.getch()
         for tup in self.input_map:
@@ -141,42 +185,48 @@ class GameWin:
                 self.input_map[tup]()
                 break
 
-
+    # cycles colors
     def up_input(self):
-        if not self.win and not self.loose:
+        if not (self.win or self.loose):
             self.logic.current_guess[self.color_index].color_up()
 
+    # cycles colors
     def down_input(self):
-        if not self.win and not self.loose:
+        if not (self.win or self.loose):
             self.logic.current_guess[self.color_index].color_down()
 
+    # moves cursor
     def right_input(self):
-        if not self.win and not self.loose:
+        if not (self.win or self.loose):
             if self.color_index < 3:
                 self.color_index += 1
 
+    # moves cursor
     def left_input(self):
-        if not self.win and not self.loose:
+        if not (self.win or self.loose):
             if self.color_index > 0:
                 self.color_index -= 1
 
+    # sets color
     def num_input(self):
-        if not self.win and not self.loose:
+        if not (self.win or self.loose):
             num = self.cur_key % 6
             if num == 0:
                 num = 6
             self.logic.current_guess[self.color_index].set_color(num)
 
+    # validates current guess
     def enter_input(self):
-        if not self.win and not self.loose:
+        if not (self.win or self.loose):
             if not self.logic.check_guess():
                 pass
             elif not self.logic.check_win(self.try_index):
                 self.next_try = True
             else:
                 self.win = True
-                self.solution_draw = True
+                self.draw_solution = True
 
+    # stops main loop
     def exit_input(self):
         self.run = False
 
