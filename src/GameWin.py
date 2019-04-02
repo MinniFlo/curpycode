@@ -49,14 +49,6 @@ class GameWin:
         self.horizontal_line_2 = "{}{}".format(chr(0x255e).ljust(self.x - 1, chr(0x2550)), chr(0x2561))
         # flag that runs the main loop
         self.run = True
-        # flag that indicates a win
-        self.win = False
-        # flag that indicates a loose
-        self.loose = False
-        # flag that indicates weather the next step is allowed
-        self.next_try = False
-        # flag that indicates that the solution has to be drawn
-        self.draw_solution = False
         # is the position where the cursor is located
         self.old_cursor_pos = (0, 0)
 
@@ -73,6 +65,7 @@ class GameWin:
         self.draw()
         self.render()
         self.logic.create_color_code()
+        self.redraw_colors()
 
     # draws the interface (lines)
     def draw(self):
@@ -85,22 +78,14 @@ class GameWin:
 
     # draws colors / hints / end game things
     def render(self):
-        self.draw_hints()
-        
-        if self.next_try:
-            self.tests_loose()
-
-        if self.win or self.loose:
-            if self.draw_solution:
-                self.draw_game_ending()
-                self.draw_solution = False
-        else:
-            self.redraw_colors()
-
-        if self.next_try:
+        if self.logic.next_try:
+            self.draw_hints()
             self.next_round()
-            self.redraw_colors()
+        if self.logic.win or self.logic.lose:
+            self.draw_hints()
+            self.draw_game_ending()
 
+        self.redraw_colors()
         self.redraw_cursor()
 
     def draw_hints(self):
@@ -126,9 +111,9 @@ class GameWin:
 
     # draws everything after the game finished
     def draw_game_ending(self):
-        if self.win:
+        if self.logic.win:
             self.main_win.addstr(0, 16, " win ")
-        elif self.loose:
+        elif self.logic.lose:
             self.main_win.addstr(0, 16, " sad ")
         self.main_win.addstr(self.try_index_map[6], 12, "The Solution:")
         for i in range(4):
@@ -137,23 +122,16 @@ class GameWin:
             self.main_win.refresh()
             time.sleep(0.25)
 
-    # checks after every valid enter input if YOU LOST THE GAME
-    def tests_loose(self):
-        self.try_index += 1
-        if self.try_index >= 6:
-            self.loose = True
-            self.draw_solution = True
-            self.next_try = False
-
     # resets some things to init next round
     def next_round(self):
-        self.next_try = False
+        self.try_index += 1
+        self.logic.next_try = False
         self.color_index = 0
         self.logic.reset_current_guess()
 
     # removes and redraws the cursor
     def redraw_cursor(self):
-        if not (self.win or self.loose):
+        if not (self.logic.win or self.logic.lose):
             old_y = self.try_index_map[self.old_cursor_pos[1]] - 1
             old_x = self.color_index_map[self.old_cursor_pos[0]] - 2
             # removes old cursor
@@ -177,7 +155,7 @@ class GameWin:
                 cur_y += 1
             self.old_cursor_pos = (self.color_index, self.try_index)
 
-    # handels input
+    # handles input
     def input(self):
         self.cur_key = self.main_win.getch()
         for tup in self.input_map:
@@ -187,29 +165,29 @@ class GameWin:
 
     # cycles colors
     def up_input(self):
-        if not (self.win or self.loose):
+        if not (self.logic.win or self.logic.lose):
             self.logic.current_guess[self.color_index].color_up()
 
     # cycles colors
     def down_input(self):
-        if not (self.win or self.loose):
+        if not (self.logic.win or self.logic.lose):
             self.logic.current_guess[self.color_index].color_down()
 
     # moves cursor
     def right_input(self):
-        if not (self.win or self.loose):
+        if not (self.logic.win or self.logic.lose):
             if self.color_index < 3:
                 self.color_index += 1
 
     # moves cursor
     def left_input(self):
-        if not (self.win or self.loose):
+        if not (self.logic.win or self.logic.lose):
             if self.color_index > 0:
                 self.color_index -= 1
 
     # sets color
     def num_input(self):
-        if not (self.win or self.loose):
+        if not (self.logic.win or self.logic.lose):
             num = self.cur_key % 6
             if num == 0:
                 num = 6
@@ -217,14 +195,8 @@ class GameWin:
 
     # validates current guess
     def enter_input(self):
-        if not (self.win or self.loose):
-            if not self.logic.check_guess():
-                pass
-            elif not self.logic.check_win(self.try_index):
-                self.next_try = True
-            else:
-                self.win = True
-                self.draw_solution = True
+        if not (self.logic.win or self.logic.lose):
+            self.logic.check_win(self.try_index)
 
     # stops main loop
     def exit_input(self):
