@@ -6,7 +6,7 @@ import time
 
 class GameWin:
 
-    def __init__(self, scr):
+    def __init__(self, scr, alternativ):
         # the screen obj
         self.scr = scr
         # the magic size of the window
@@ -53,6 +53,10 @@ class GameWin:
         self.draw_solution = True
         # is the position where the cursor is located
         self.old_cursor_pos = (0, 0)
+        if alternativ:
+            self.game_setup = self.alt_game_setup
+        else:
+            self.game_setup = self.normal_game_setup
 
     def setup(self):
         # set's curses to no echo mode
@@ -64,7 +68,7 @@ class GameWin:
         # activates arrow key's
         self.win.keypad(True)
         # self.normal_game_setup()
-        self.alt_game_setup()
+        self.game_setup()
 
     # draws the interface (normal game)
     def normal_game_setup(self):
@@ -222,7 +226,7 @@ class GameWin:
         self.logic = SuperCodeLogic()
         self.win.clear()
         self.try_index = 0
-        self.alt_game_setup()
+        self.game_setup()
 
     # validates current guess
     def enter_input(self):
