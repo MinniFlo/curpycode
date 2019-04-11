@@ -62,12 +62,21 @@ class GameWin:
         # activates delayed input
         self.win.nodelay(False)
         # activates arrow key's
-        # draws the interface
         self.win.keypad(True)
+        # self.normal_game_setup()
+        self.alt_game_setup()
+
+    # draws the interface (normal game)
+    def normal_game_setup(self):
+        self.logic.create_color_code()
         self.draw()
         self.render()
-        self.logic.create_color_code()
-        self.redraw_colors()
+
+    # draws the interface (alternative game)
+    def alt_game_setup(self):
+        self.logic.altgamemode_setup()
+        self.draw()
+        self.draw_altgamemode()
 
     # draws the interface (lines)
     def draw(self):
@@ -78,6 +87,16 @@ class GameWin:
             start_y += 4
         self.win.addstr(start_y, 0, self.horizontal_line_2)
 
+    # draws the first 5 color trys and hints for the alternative game mode
+    def draw_altgamemode(self):
+        for i in range(5):
+            for (j, field) in enumerate(self.logic.guesses_map[self.try_index]):
+                self.win.addstr(self.try_index_map[self.try_index], self.color_index_map[j], self.color_chr,
+                                     curses.color_pair(field.get_color()))
+            self.draw_hints()
+            self.try_index += 1
+        self.redraw_colors()
+        self.redraw_cursor()
 
     # draws colors / hints / end game things
     def render(self):
