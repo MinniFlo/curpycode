@@ -20,8 +20,8 @@ class GameWin:
         # all available inputs as key's and the values are the functions they trigger
         self.input_map = {(ord('w'), ord('k'), 259): self.up_input, (ord('s'), ord('j'), 258): self.down_input,
                           (ord('d'), ord('l'), 261): self.right_input, (ord('a'), ord('h'), 260): self.left_input,
-                          (49, 50, 51, 52, 53, 54): self.num_input,
-                          (ord(' '), 10): self.enter_input, (ord('q'), 27): self.exit_input}
+                          (49, 50, 51, 52, 53, 54): self.num_input,(ord(' '), 10): self.enter_input,
+                          (ord('r'),): self.reset_input, (ord('q'), 27): self.exit_input}
         # is the index to the try_index_map witch defines where on the x-axis the try's are located
         self.try_index = 0
         self.try_index_map = {0: 2, 1: 6, 2: 10, 3: 14, 4: 18, 5: 22, 6: 26}
@@ -197,6 +197,13 @@ class GameWin:
             if num == 0:
                 num = 6
             self.logic.current_guess[self.color_index].set_color(num)
+
+    # resets game state
+    def reset_input(self):
+        self.logic = SuperCodeLogic()
+        self.win.clear()
+        self.try_index = 0
+        self.alt_game_setup()
 
     # validates current guess
     def enter_input(self):
