@@ -85,3 +85,23 @@ class SuperCodeLogic:
                 self.lose = True
                 return
             self.next_try = True
+
+    # sets alternative game mode up
+    def altgamemode_setup(self):
+        self.create_color_code()
+        code = list(self.color_code.values())
+        for index in range(5):
+            while True:
+                code_try = []
+                for _ in range(4):
+                    code_try.append(random.randrange(1, 7))
+                if code_try != code:
+                    for num in code_try:
+                        self.guesses_map[index].append(Field(num))
+                    break
+            self.build_hints(index)
+
+
+
+
+
