@@ -49,6 +49,8 @@ class GameWin:
         self.horizontal_line_2 = "{}{}".format(chr(0x255e).ljust(self.x - 1, chr(0x2550)), chr(0x2561))
         # flag that runs the main loop
         self.run = True
+        # prevents the delay of the draw_game_ending() happening on every input after a win or lose
+        self.draw_solution = True
         # is the position where the cursor is located
         self.old_cursor_pos = (0, 0)
 
@@ -83,8 +85,9 @@ class GameWin:
             self.draw_hints()
             self.next_round()
         if self.logic.win or self.logic.lose:
-            self.draw_hints()
-            self.draw_game_ending()
+            if self.draw_solution:
+                self.draw_hints()
+                self.draw_game_ending()
 
         self.redraw_colors()
         self.redraw_cursor()
@@ -122,6 +125,7 @@ class GameWin:
                                  curses.color_pair(self.logic.color_code[i]))
             self.win.refresh()
             time.sleep(0.25)
+        self.draw_solution = False
 
     # resets some things to init next round
     def next_round(self):
