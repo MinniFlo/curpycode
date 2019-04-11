@@ -12,7 +12,7 @@ class GameWin:
         # the magic size of the window
         self.y, self.x = 31, 38
         # creates the game window
-        self.main_win = curses.newwin(self.y, self.x, 0, 0)
+        self.win = curses.newwin(self.y, self.x, 0, 0)
         # instance of the Logic class
         self.logic = SuperCodeLogic()
         # instance of the Color class
@@ -58,10 +58,10 @@ class GameWin:
         # set's cursor visibility to none visible
         curses.curs_set(0)
         # activates delayed input
-        self.main_win.nodelay(False)
+        self.win.nodelay(False)
         # activates arrow key's
-        self.main_win.keypad(True)
         # draws the interface
+        self.win.keypad(True)
         self.draw()
         self.render()
         self.logic.create_color_code()
@@ -70,11 +70,12 @@ class GameWin:
     # draws the interface (lines)
     def draw(self):
         start_y = 4
-        self.main_win.box()
+        self.win.box()
         for _ in range(5):
-            self.main_win.addstr(start_y, 0, self.horizontal_line)
+            self.win.addstr(start_y, 0, self.horizontal_line)
             start_y += 4
-        self.main_win.addstr(start_y, 0, self.horizontal_line_2)
+        self.win.addstr(start_y, 0, self.horizontal_line_2)
+
 
     # draws colors / hints / end game things
     def render(self):
@@ -92,34 +93,34 @@ class GameWin:
         cur_hint_index = self.hint_start
         for i, val in enumerate(self.logic.hints_map[self.try_index]):
             if val == 2:
-                self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.black_chr + ' ')
+                self.win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.black_chr + ' ')
             elif val == 1:
-                self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.white_chr + ' ')
+                self.win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.white_chr + ' ')
             else:
-                self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.blank_chr)
+                self.win.addstr(self.try_index_map[self.try_index], cur_hint_index, self.blank_chr)
             cur_hint_index += 3
             if i == 3:
                 # prints a wall piece at the end to prevent a bug in curses where the unicode char's are cut off if no
                 # symbol follows
-                self.main_win.addstr(self.try_index_map[self.try_index], cur_hint_index, chr(9474))
+                self.win.addstr(self.try_index_map[self.try_index], cur_hint_index, chr(9474))
 
     # updates colors and draws the color chars on next try
     def redraw_colors(self):
         for i in range(4):
-            self.main_win.addstr(self.try_index_map[self.try_index], self.color_index_map[i], self.color_chr,
+            self.win.addstr(self.try_index_map[self.try_index], self.color_index_map[i], self.color_chr,
                                  curses.color_pair(self.logic.current_guess[i].get_color()))
 
     # draws everything after the game finished
     def draw_game_ending(self):
         if self.logic.win:
-            self.main_win.addstr(0, 16, " win ")
+            self.win.addstr(0, 16, " win ")
         elif self.logic.lose:
-            self.main_win.addstr(0, 16, " sad ")
-        self.main_win.addstr(self.try_index_map[6], 12, "The Solution:")
+            self.win.addstr(0, 16, " sad ")
+        self.win.addstr(self.try_index_map[6], 12, "The Solution:")
         for i in range(4):
-            self.main_win.addstr(self.try_index_map[6] + 2, self.color_index_map[i] + 6, self.color_chr,
+            self.win.addstr(self.try_index_map[6] + 2, self.color_index_map[i] + 6, self.color_chr,
                                  curses.color_pair(self.logic.color_code[i]))
-            self.main_win.refresh()
+            self.win.refresh()
             time.sleep(0.25)
 
     # resets some things to init next round
@@ -137,27 +138,27 @@ class GameWin:
             # removes old cursor
             for i in range(3):
                 if i == 1:
-                    self.main_win.addstr(old_y, old_x, ' ')
-                    self.main_win.addstr(old_y, old_x + 5, ' ')
+                    self.win.addstr(old_y, old_x, ' ')
+                    self.win.addstr(old_y, old_x + 5, ' ')
                 else:
-                    self.main_win.addstr(old_y, old_x, ' ')
-                    self.main_win.addstr(old_y, old_x + 5, ' ')
-                    self.main_win.addstr(old_y, old_x + 1, '     ')
+                    self.win.addstr(old_y, old_x, ' ')
+                    self.win.addstr(old_y, old_x + 5, ' ')
+                    self.win.addstr(old_y, old_x + 1, '     ')
                 old_y += 1
             cur_y = self.try_index_map[self.try_index] - 1
             cur_x = self.color_index_map[self.color_index] - 2
             # prints new cursor
             for i in range(3):
                 if i != 1:
-                    self.main_win.addstr(cur_y, cur_x, self.cursor_chars[6] * 5)
-                self.main_win.addstr(cur_y, cur_x, self.cursor_chars[i])
-                self.main_win.addstr(cur_y, cur_x + 5, self.cursor_chars[i + 3])
+                    self.win.addstr(cur_y, cur_x, self.cursor_chars[6] * 5)
+                self.win.addstr(cur_y, cur_x, self.cursor_chars[i])
+                self.win.addstr(cur_y, cur_x + 5, self.cursor_chars[i + 3])
                 cur_y += 1
             self.old_cursor_pos = (self.color_index, self.try_index)
 
     # handles input
     def input(self):
-        self.cur_key = self.main_win.getch()
+        self.cur_key = self.win.getch()
         for tup in self.input_map:
             if self.cur_key in tup:
                 self.input_map[tup]()
