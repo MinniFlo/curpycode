@@ -2,8 +2,8 @@
 
 class Field:
 
-    def __init__(self):
-        self.color = 0
+    def __init__(self, color):
+        self.color = color
 
     def color_up(self):
         self.color = (self.color % 6) + 1

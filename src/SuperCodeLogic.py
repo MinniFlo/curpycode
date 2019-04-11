@@ -9,7 +9,7 @@ class SuperCodeLogic:
         # the solution
         self.color_code = {0: 0, 1: 0, 2: 0, 3: 0}
         # the current try
-        self.current_guess = {0: Field(), 1: Field(), 2: Field(), 3: Field()}
+        self.current_guess = {0: Field(0), 1: Field(0), 2: Field(0), 3: Field(0)}
         # stores all the guesses
         self.guesses_map = {0: [], 1: [], 2: [], 3: [], 4: [],
                             5: [], 6: []}
@@ -37,7 +37,7 @@ class SuperCodeLogic:
 
     def reset_current_guess(self):
         for i in range(4):
-            self.current_guess[i] = Field()
+            self.current_guess[i] = Field(0)
 
     # checks if the current guess is completely filled with colors
     # has to be called before check_win
