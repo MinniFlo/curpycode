@@ -226,6 +226,7 @@ class GameWin:
         self.logic = SuperCodeLogic()
         self.win.clear()
         self.try_index = 0
+        self.draw_solution = True
         self.game_setup()
 
     # validates current guess
