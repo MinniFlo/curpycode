@@ -1,4 +1,5 @@
 from SuperCodeLogic import SuperCodeLogic
+from InfoWin import InfoWin
 from Color import Color
 import curses
 import time
@@ -7,8 +8,6 @@ import time
 class GameWin:
 
     def __init__(self, scr, alternativ):
-        # the screen obj
-        self.scr = scr
         # the magic size of the window
         self.y, self.x = 31, 38
         # creates the game window
@@ -20,7 +19,7 @@ class GameWin:
         # all available inputs as key's and the values are the functions they trigger
         self.input_map = {(ord('w'), ord('k'), 259): self.up_input, (ord('s'), ord('j'), 258): self.down_input,
                           (ord('d'), ord('l'), 261): self.right_input, (ord('a'), ord('h'), 260): self.left_input,
-                          (49, 50, 51, 52, 53, 54): self.num_input,(ord(' '), 10): self.enter_input,
+                          (49, 50, 51, 52, 53, 54): self.num_input, (ord(' '), 10): self.enter_input,
                           (ord('r'),): self.reset_input, (ord('q'), 27): self.exit_input}
         # is the index to the try_index_map witch defines where on the x-axis the try's are located
         self.try_index = 0
@@ -53,6 +52,8 @@ class GameWin:
         self.draw_solution = True
         # is the position where the cursor is located
         self.old_cursor_pos = (0, 0)
+        # reference to the info window
+        self.info_win = InfoWin((self.y, self.x))
         if alternativ:
             self.game_setup = self.alt_game_setup
         else:
@@ -74,6 +75,8 @@ class GameWin:
     def normal_game_setup(self):
         self.logic.create_color_code()
         self.draw()
+        self.info_win.draw()
+        self.info_win.win.refresh()
         self.render()
 
     # draws the interface (alternative game)
@@ -96,7 +99,7 @@ class GameWin:
         for i in range(5):
             for (j, field) in enumerate(self.logic.guesses_map[self.try_index]):
                 self.win.addstr(self.try_index_map[self.try_index], self.color_index_map[j], self.color_chr,
-                                     curses.color_pair(field.get_color()))
+                                curses.color_pair(field.get_color()))
             self.draw_hints()
             self.try_index += 1
         self.redraw_colors()
@@ -134,7 +137,7 @@ class GameWin:
     def redraw_colors(self):
         for i in range(4):
             self.win.addstr(self.try_index_map[self.try_index], self.color_index_map[i], self.color_chr,
-                                 curses.color_pair(self.logic.current_guess[i].get_color()))
+                            curses.color_pair(self.logic.current_guess[i].get_color()))
 
     # draws everything after the game finished
     def draw_game_ending(self):
@@ -145,7 +148,7 @@ class GameWin:
         self.win.addstr(self.try_index_map[6], 12, "The Solution:")
         for i in range(4):
             self.win.addstr(self.try_index_map[6] + 2, self.color_index_map[i] + 6, self.color_chr,
-                                 curses.color_pair(self.logic.color_code[i]))
+                            curses.color_pair(self.logic.color_code[i]))
             self.win.refresh()
             time.sleep(0.25)
         self.draw_solution = False
