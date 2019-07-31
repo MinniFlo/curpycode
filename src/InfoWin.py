@@ -57,4 +57,5 @@ class InfoWin:
         for color in range(1, 7):
             self.win.addstr(cur_y, cur_x, self.color_chr, curses.color_pair(color))
             cur_x += 3
+        self.win.refresh()
 

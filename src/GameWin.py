@@ -76,13 +76,13 @@ class GameWin:
         self.logic.create_color_code()
         self.draw()
         self.info_win.draw()
-        self.info_win.win.refresh()
         self.render()
 
     # draws the interface (alternative game)
     def alt_game_setup(self):
         self.logic.altgamemode_setup()
         self.draw()
+        self.info_win.draw()
         self.draw_altgamemode()
 
     # draws the interface (lines)
