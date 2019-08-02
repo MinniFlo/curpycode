@@ -31,7 +31,7 @@ class InfoWin:
                         " Gameplay\n" \
                         "   The goal is to guess the color code within six guesses correctly.\n\n" \
                         "   The color code can consist of any combination of these colors:\n" \
-                        "   ## ## ## ## ## ##\n\n" \
+                        "     ##  ##  ##  ##  ##  ##\n\n" \
                         "   You can only confirm a guess if you fill all slots with a color\n\n" \
                         "   If your guess is not correct you will get hints:\n\n" \
                         "     ~ {black} one of your slots is identical with the color code\n\n" \
@@ -53,9 +53,9 @@ class InfoWin:
         self.win.addstr(5, self.info_x, "  ~ 1,2,3,4,5,6:", curses.A_BOLD)
         self.win.addstr(8, self.info_x, "  ~ enter/space:", curses.A_BOLD)
         self.win.addstr(11, self.info_x, "  ~ r:", curses.A_BOLD)
-        cur_y, cur_x = 18, 3
+        cur_y, cur_x = 18, 5
         for color in range(1, 7):
             self.win.addstr(cur_y, cur_x, self.color_chr, curses.color_pair(color))
-            cur_x += 3
+            cur_x += 4
         self.win.refresh()
 
