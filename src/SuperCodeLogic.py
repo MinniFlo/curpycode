@@ -95,7 +95,11 @@ class SuperCodeLogic:
                 code_try = []
                 for _ in range(4):
                     code_try.append(random.randrange(1, 7))
-                if code_try != code:
+                all_ready_exists = False
+                for saved_code in self.guesses_map.values():
+                    if saved_code == code_try:
+                        all_ready_exists = True
+                if code_try != code and not all_ready_exists:
                     for num in code_try:
                         self.guesses_map[index].append(Field(num))
                     break
