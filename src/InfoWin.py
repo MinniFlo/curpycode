@@ -3,7 +3,7 @@ import curses
 class InfoWin:
 
     def __init__(self, window_messure):
-        self.win = curses.newwin(window_messure[0], 85, 0, window_messure[1])
+        self.win = curses.newwin(window_messure[0] + 1, 85, 0, window_messure[1])
         # the char that presents a code piece
         self.color_chr = chr(9608) * 2
         # the char that presents an almost hit
@@ -30,7 +30,7 @@ class InfoWin:
                         "     restart the game\n\n" \
                         " Gameplay\n" \
                         "   The goal is to guess the color code within six guesses correctly.\n\n" \
-                        "   The color code can consist of any combination of these colors:\n" \
+                        "   The color code can consist of any combination of these colors:\n\n" \
                         "     ##  ##  ##  ##  ##  ##\n\n" \
                         "   You can only confirm a guess if you fill all slots with a color\n\n" \
                         "   If your guess is not correct you will get hints:\n\n" \
@@ -53,7 +53,7 @@ class InfoWin:
         self.win.addstr(5, self.info_x, "  ~ 1,2,3,4,5,6:", curses.A_BOLD)
         self.win.addstr(8, self.info_x, "  ~ enter/space:", curses.A_BOLD)
         self.win.addstr(11, self.info_x, "  ~ r:", curses.A_BOLD)
-        cur_y, cur_x = 18, 5
+        cur_y, cur_x = 19, 5
         for color in range(1, 7):
             self.win.addstr(cur_y, cur_x, self.color_chr, curses.color_pair(color))
             cur_x += 4

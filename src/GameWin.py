@@ -9,7 +9,7 @@ class GameWin:
 
     def __init__(self, scr, alternativ):
         # the magic size of the window
-        self.y, self.x = 31, 38
+        self.y, self.x = 32, 38
         # creates the game window
         self.win = curses.newwin(self.y, self.x, 0, 0)
         # instance of the Logic class
