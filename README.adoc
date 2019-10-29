@@ -1,2 +1,46 @@
-= curpycode
-colorcode game written in python (curses)
+:imagesdir: ./images
+
+
+= curpymines
+
+== How to start
+
+run `python ./supercode/src/main.py`
+
+== How to control
+
+[option="header", cols="2h, 2, 2, 2"]
+|===
+|description h|option 1 h|option 2 h|option 3
+|navigation  |a, d  |h, l  |arrow left/ right
+|cycle color |w, s  |k, l  |arrow up/ down
+|set color   |1 - 6  |-    |-
+|confirm     |space |enter |-
+|reset game  |r |- |-  
+|exit game   |q |- |-
+|===
+
+== Available Flags
+
+`-h, --help` +
+
+* shows the help message
+
+`-a, --lastchance` +
+
+* activates alternative game mode 
+
+== normal game mode
+
+You get six chances to guess the color code. After every guess you get hints. 
+
+image::supercode1.png[align=center]
+image::supercode2.png[align=center]
+
+== alternative game mode
+
+Five guesses are allready randomly chosen. You have one last try to solve it.
+
+image::supercode3.png[align=center]
+
+
