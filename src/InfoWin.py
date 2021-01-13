@@ -20,7 +20,7 @@ class InfoWin:
         self.info_y, self.info_x = (1, 1)
         # the string that contains informations of the game
         self.info_str = " Movement\n" \
-                        "   ~ w,a,s,d/h,j,k,l/{left},{up},{right},{down}:\n" \
+                        "   ~ w,a,s,d/h,j,k,l/l,u,r,d:\n" \
                         "     navigate sideways and cycle the colors of the current selection\n\n" \
                         "   ~ 1,2,3,4,5,6:\n" \
                         "     set a specific color to the current selection\n\n" \
@@ -38,8 +38,7 @@ class InfoWin:
                         "     ~ {white} one of your slots holds a color that is in the color code,\n" \
                         "         but not in the right position\n\n" \
                         "     ~ {blank} one of your slots holds a color that is not in the color code\n" \
-            .format(left=self.arrow_left, up=self.arrow_up, right=self.arrow_right, down=self.arrow_right,
-                    black=self.black_chr, white=self.white_chr, blank=self.blank_chr)
+            .format(black=self.black_chr, white=self.white_chr, blank=self.blank_chr)
 
     def draw(self):
         self.win.addstr(1, 0, self.info_str)
@@ -48,7 +47,7 @@ class InfoWin:
         self.win.addstr(14, self.info_x, "GAMEPLAY", curses.A_BOLD)
         # make key options bold
         self.win.addstr(2, self.info_x, "  ~ w,a,s,d/h,j,k,l/{left},{up},{right},{down}:"
-                        .format(left=self.arrow_left, up=self.arrow_up, right=self.arrow_right, down=self.arrow_right),
+                        .format(left=self.arrow_left, up=self.arrow_up, right=self.arrow_right, down=self.arrow_down),
                         curses.A_BOLD)
         self.win.addstr(5, self.info_x, "  ~ 1,2,3,4,5,6:", curses.A_BOLD)
         self.win.addstr(8, self.info_x, "  ~ enter/space:", curses.A_BOLD)
